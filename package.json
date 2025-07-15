@@ -19,5 +19,9 @@
     "finance"
   ],
   "author": "AI Engineer",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^24.0.14",
+    "typescript": "^5.8.3"
+  }
 }
