@@ -1,0 +1,30 @@
+{
+  "name": "financial-optimization-platform",
+  "version": "1.0.0",
+  "description": "Plataforma de IA para la optimización financiera en logística.",
+  "scripts": {
+    "build": "esbuild index.tsx --bundle --outfile=main.js --jsx=automatic"
+  },
+  "dependencies": {
+    "@google/genai": "^0.14.0",
+    "esbuild": "^0.23.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "pdfjs-dist": "^4.4.168",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "recharts": "^3.1.0"
+  },
+  "keywords": [
+    "react",
+    "ai",
+    "gemini",
+    "logistics",
+    "finance"
+  ],
+  "author": "AI Engineer",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@vercel/node": "^5.3.5"
+  }
+}
