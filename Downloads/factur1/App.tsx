@@ -108,7 +108,7 @@ const App: React.FC = () => {
                             description="Ofrecemos trazabilidad completa. Cada dato extraído y cada anomalía detectada se vincula a su origen en el documento, asegurando una total comprensibilidad y auditabilidad."
                         />
                     </div>
-                </section>
+                </Section>
 
             </main>
             <footer className="text-center py-8 bg-slate-800 text-slate-400">
