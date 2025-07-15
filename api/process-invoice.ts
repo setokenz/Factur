@@ -1,13 +1,17 @@
-import { GoogleGenAI, Type } from "@google/genai";
+// 1. Importación corregida
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 // Esta función se ejecutará en el servidor de Vercel, no en el navegador.
-export default async function handler(request: any, response: any) {
+export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {
     return response.status(405).json({ error: 'Método no permitido' });
   }
 
-  const apiKey = process.env.API_KEY;
+  // 2. Variable de entorno: ¡Asegúrate de que este nombre coincida con el de Vercel!
+  const apiKey = process.env.API_KEY; 
   if (!apiKey) {
+    // Se ha cambiado el código de estado a 500 (Error del servidor) que es más apropiado
     return response.status(500).json({ error: 'La clave de API no está configurada en el servidor.' });
   }
 
@@ -17,28 +21,38 @@ export default async function handler(request: any, response: any) {
         return response.status(400).json({ error: 'Faltan datos de la imagen (base64) o el tipo MIME.' });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    // 3. Creación del cliente corregida
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
+    // 4. Se obtiene el modelo y se configura la respuesta JSON
+    const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-latest", // Nombre de modelo actualizado y válido
+        generationConfig: {
+            responseMimeType: "application/json",
+        },
+    });
 
+    // 5. Esquema con los tipos de datos como strings
     const schema = {
-        type: Type.OBJECT,
+        type: 'object',
         properties: {
-            proveedor: { type: Type.STRING },
-            nif: { type: Type.STRING },
-            numeroFactura: { type: Type.STRING },
-            fechaEmision: { type: Type.STRING },
-            fechaVencimiento: { type: Type.STRING },
-            total: { type: Type.NUMBER },
-            baseImponible: { type: Type.NUMBER },
-            impuestos: { type: Type.NUMBER },
+            proveedor: { type: 'string' },
+            nif: { type: 'string' },
+            numeroFactura: { type: 'string' },
+            fechaEmision: { type: 'string' },
+            fechaVencimiento: { type: 'string' },
+            total: { type: 'number' },
+            baseImponible: { type: 'number' },
+            impuestos: { type: 'number' },
             lineas: {
-                type: Type.ARRAY,
+                type: 'array',
                 items: {
-                    type: Type.OBJECT,
+                    type: 'object',
                     properties: {
-                        description: { type: Type.STRING },
-                        quantity: { type: Type.NUMBER },
-                        unitPrice: { type: Type.NUMBER },
-                        totalPrice: { type: Type.NUMBER },
+                        description: { type: 'string' },
+                        quantity: { type: 'number' },
+                        unitPrice: { type: 'number' },
+                        totalPrice: { type: 'number' },
                     },
                     required: ["description", "totalPrice"]
                 }
@@ -54,18 +68,15 @@ export default async function handler(request: any, response: any) {
         },
     };
     
-    const prompt = "Extrae los datos estructurados de la siguiente factura, incluyendo las líneas de detalle o conceptos facturados. Responde únicamente con el objeto JSON.";
+    const prompt = `Extrae los datos estructurados de la siguiente factura, incluyendo las líneas de detalle o conceptos facturados. Responde únicamente con el objeto JSON definido en el siguiente esquema: ${JSON.stringify(schema)}`;
 
-    const result = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: { parts: [{ text: prompt }, imagePart] },
-        config: { responseMimeType: "application/json", responseSchema: schema }
-    });
+    // 6. Llamada a generateContent corregida
+    const result = await model.generateContent([prompt, imagePart]);
     
-    // Vercel recomienda usar JSON.parse(result.text) si la respuesta es un string JSON
-    // pero si el SDK ya lo parsea, se podría usar directamente result.json()
-    // Por seguridad, parseamos el texto que sabemos que es un string.
-    return response.status(200).json(JSON.parse(result.text));
+    // 7. Acceso a la respuesta corregido
+    const jsonResponse = result.response.text();
+    
+    return response.status(200).json(JSON.parse(jsonResponse));
 
   } catch (error) {
     console.error('Error al procesar con Gemini:', error);
